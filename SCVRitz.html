@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>360° Guest</title>
+  <style>
+    body {
+      font-family: 'Georgia', serif;
+      background-color: #f2f2f2;
+      color: #00254d;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+    }
+
+    .ipad-frame {
+      background: black;
+      width: 1366px;
+      height: 1024px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 30px;
+      padding: 20px;
+    }
+
+    .content {
+      width: 90%;
+      height: 90%;
+      background: white;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    h2 {
+      font-family: 'Times New Roman', Times, serif;
+      color: #00254d;
+      margin: 10px 0;
+    }
+
+    img.logo {
+      max-width: 300px;
+      height: auto;
+      margin-bottom: 20px;
+    }
+
+    input[type="text"], textarea {
+      width: 90%;
+      max-width: 400px;
+      padding: 10px;
+      border: 1px solid #d4af37;
+      border-radius: 4px;
+      margin-bottom: 0;
+      font-size: 16px;
+      position: relative;
+    }
+
+    #suggestions {
+      border: 1px solid #d4af37;
+      background: #ffffff;
+      color: #00254d;
+      max-height: 300px;
+      overflow-y: auto;
+      width: 90%;
+      max-width: 400px;
+      box-sizing: border-box;
+      margin-top: 10px;
+      z-index: 1000;
+    }
+
+    #suggestions div {
+      padding: 10px;
+      cursor: pointer;
+      border-bottom: 1px solid #d4af37;
+    }
+
+    #suggestions div:hover {
+      background: #d4af37;
+      color: #ffffff;
+    }
+
+    .details-comment-container {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      display: none;
+    }
+
+    #details-container, #comment-section {
+      width: 48%;
+    }
+
+    #details-container {
+      background: #ffffff;
+      border: 1px solid #d4af37;
+      padding: 20px;
+      margin-top: 20px;
+      border-radius: 8px;
+    }
+
+    #client-details h2 {
+      color: #d4af37;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #transactions {
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .transaction-list {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .transaction-list li {
+      border-bottom: 1px solid #d4af37;
+      padding: 10px 0;
+    }
+
+    p {
+      margin: 5px 0;
+    }
+
+    p strong {
+      color: #00254d;
+    }
+
+    .editable {
+      border: 1px solid #d4af37;
+      border-radius: 4px;
+      padding: 5px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .edit-icon {
+      top: 10px;
+      right: 10px;
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+    }
+
+    .pen-icon {
+      cursor: pointer;
+      width: 24px;
+      height: 24px;
+    }
+
+    .non-editable {
+      background-color: #f2f2f2;
+      border: none;
+      color: #00254d;
+    }
+
+    .pop-in {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #ffffff;
+      border: 1px solid #d4af37;
+      border-radius: 8px;
+      width: 80%;
+      max-width: 300px;
+      z-index: 1000;
+      text-align: center;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .pop-in h3 {
+      font-family: 'Times New Roman', Times, serif;
+      color: #00254d;
+    }
+
+    .pop-in button {
+      margin: 10px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .pop-in .confirm {
+      background-color: #d4af37;
+      color: #ffffff;
+    }
+
+    .pop-in .cancel {
+      background-color: #f2f2f2;
+      color: #00254d;
+    }
+
+    .pop-in .confirm:hover {
+      background-color: #00254d;
+      color: #d4af37;
+    }
+
+    .pop-in .cancel:hover {
+      background-color: #d4af37;
+      color: #ffffff;
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 500;
+    }
+
+    #comment-section {
+      width: 48%;
+      display: none;
+      background: #ffffff;
+      border: 1px solid #d4af37;
+      padding: 20px;
+      margin-top: 20px;
+      border-radius: 8px;
+    }
+
+    #comment-section h2 {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #d4af37;
+    }
+
+    #comment-textarea {
+      display: none;
+      width: 100%;
+    }
+
+    #comment-section textarea {
+      width: 100%;
+      height: 100px;
+    }
+
+    #comment-section button {
+      background-color: #d4af37;
+      color: #ffffff;
+      border: none;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin-top: 10px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    #comment-section button:hover {
+      background-color: #00254d;
+      color: #d4af37;
+    }
+
+    #save-button {
+      background-color: #d4af37;
+      color: #ffffff;
+      border: none;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin-top: 10px;
+      cursor: pointer;
+      border-radius: 4px;
+      display: none; /* Masqué par défaut */
+    }
+
+    #save-button:hover {
+      background-color: #00254d;
+      color: #d4af37;
+    }
+
+    .add-contact {
+      margin-left: 10px;
+      background-color: #d4af37;
+      color: #ffffff;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 24px;
+      line-height: 40px;
+      cursor: pointer;
+    }
+
+    .user-info {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: #00254d;
+      font-size: 16px;
+      background: #ffffff;
+      padding: 10px;
+      border-radius: 8px;
+    }
+    
+    p {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+p input[type="text"] {
+  flex: 1;
+  margin-left: 40px;
+}
+
+/* CSS pour styliser le bouton Check-in */
+.checkin-button {
+  background-color: #d4af37; /* Couleur de fond dorée */
+  color: #ffffff; /* Couleur du texte blanche */
+  border: none; /* Pas de bordure */
+  border-radius: 5px; /* Coins arrondis */
+  padding: 10px 20px; /* Espacement interne (haut, droite, bas, gauche) */
+  font-size: 16px; /* Taille de police */
+  font-family: 'Georgia', serif; /* Police de caractères */  cursor: pointer; /* Curseur en forme de main au survol */
+  transition: background-color 0.3s ease, color 0.3s ease; /* Transition pour les effets de survol */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Ombre pour donner un effet de relief */
+  margin-left: 20px; /* Marge gauche */
+  margin-right: 20px; /* Marge droite */
+  margin-top: 10px; /* Marge supérieure */
+}
+
+/* Effet de survol */
+.checkin-button:hover {
+  background-color: #00254d; /* Couleur de fond bleue foncée */
+  color: #d4af37; /* Couleur du texte dorée */
+}
+
+/* Effet de clic */
+.checkin-button:active {
+  background-color: #001f3b; /* Couleur de fond encore plus foncée au clic */
+  color: #f2f2f2; /* Couleur du texte plus claire au clic */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Réduire l'ombre pour un effet de clic */
+  transform: translateY(1px); /* Légère translation vers le bas pour effet de clic */
+}
+  </style>
+  <link rel="icon" href="https://imostripo.blob.core.windows.net/ac90110b5f984bcca8704d4591edc0df/lib/pluginId_ac90110b5f984bcca8704d4591edc0df_0cabc361-cc0b-481c-8a4f-806d3445148f/telechargement_LUH.png" type="image/gif" />
+</head>
+<body>
+  <div class="ipad-frame">
+    <div class="content">
+      <div class="user-info">
+        <p style="margin-right: 10px; font-weight: bold;">Logged in as</p>
+        <p style="margin-right: 10px;">John Doe</p>
+        <p style="margin-right: 10px;">Hotel Manager</p>
+      </div>
+      <img src="https://cdn.cookielaw.org/logos/4d745b05-b159-43c9-90ec-35a20d43e079/8c716c50-ea83-4568-9e46-b7cf524efb92/0256bc6e-62d6-4df0-b222-7152be8be3dc/MicrosoftTeams-image.png" alt="Ritz Paris Logo" class="logo">
+      <div style="display: flex; align-items: center;">
+        <input type="text" id="emailInput" placeholder="Enter email">
+        <button class="add-contact" id="add-contact-button">+</button>
+      </div>
+      <div id="suggestions"></div>
+      <div class="details-comment-container">
+        <div id="details-container">
+          <div id="client-details">
+            <h2>Client Details
+              <img src="https://cdn-icons-png.flaticon.com/512/1250/1250615.png" alt="Edit" class="edit-icon" id="edit-icon">
+            </h2>
+            <p><strong>First Name:</strong> <input type="text" id="client-firstname" class="editable non-editable" readonly></p>
+            <p><strong>Last Name:</strong> <input type="text" id="client-lastname" class="editable non-editable" readonly></p>
+            <p><strong>Email:</strong> <input type="text" id="client-email" class="editable non-editable" readonly></p>
+            <p><strong>Opt-In Email:</strong> <input type="text" id="client-optin" class="editable non-editable" readonly></p>
+            <p><strong>Status:</strong> <input type="text" id="client-status" class="editable non-editable" readonly></p>
+            <p><strong>Nom du chien :</strong><input type="text" id="client-seller" class="editable non-editable" readonly></p>
+            <button id="save-button">Update contact details</button>
+            <div id="transactions">
+              <h2>Recent Activities</h2>
+              <div>
+                <h3>Restaurants & Bars</h3>
+                <ul id="store-transactions" class="transaction-list"></ul>
+              </div>
+              <div>
+                <h3>Rooms & Suites</h3>
+                <ul id="web-transactions" class="transaction-list"></ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Section de commentaires -->
+        <div id="comment-section">
+          <h2>Commentaires <img src="https://cdn-icons-png.flaticon.com/512/1250/1250615.png" alt="Pen" class="pen-icon" id="pen-icon"></h2>
+          <div id="comment-textarea">
+            <textarea id="comment" placeholder="Enter your comment"></textarea>
+            <button id="submitCommentButton">Submit Comment</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pop-in de confirmation -->
+  <div class="overlay" id="overlay"></div>
+  <div class="pop-in" id="confirmation-pop-in">
+    <h3>Confirm Changes</h3>
+    <p>Are you sure you want to save the changes?</p>
+    <button class="confirm" id="confirm-button">Confirm</button>
+    <button class="cancel" id="cancel-button">Cancel</button>
+  </div>
+
+  <!-- Pop-in de confirmation de soumission de commentaire -->
+  <div class="overlay" id="comment-overlay"></div>
+  <div class="pop-in" id="comment-confirmation-pop-in">
+    <h3>Submit Comment</h3>
+    <p>Are you sure you want to submit this comment?</p>
+    <button class="confirm" id="comment-confirm-button">Confirm</button>
+    <button class="cancel" id="comment-cancel-button">Cancel</button>
+  </div>
+
+  <!-- Pop-in de création de contact -->
+  <div class="overlay" id="contact-overlay"></div>
+  <div class="pop-in" id="contact-pop-in">
+    <h3>Create New Contact</h3>
+    <p>First Name: <input type="text" id="new-firstname"></p>
+    <p>Last Name: <input type="text" id="new-lastname"></p>
+    <p>Email: <input type="text" id="new-email"></p>
+    <button class="confirm" id="create-contact-button">Create</button>
+    <button class="cancel" id="cancel-create-contact-button">Cancel</button>
+  </div>
+
+  <!-- Pop-in de confirmation de Check-in -->
+  <div class="overlay" id="checkin-popin-overlay"></div>
+  <div class="pop-in" id="checkin-popin">
+    <h3>Confirmer Check-in</h3>
+    <p>Êtes-vous sûr de vouloir faire le check-in ?</p>
+    <button class="confirm" id="confirm-checkin-button">Oui</button>
+    <button class="cancel" id="cancel-checkin-button">Non</button>
+  </div>
+
+  <script>
+    document.getElementById('emailInput').addEventListener('input', function() {
+      const email = this.value;
+      if (email.length > 0) {
+        fetchRecords(email);
+      } else {
+        clearSuggestions();
+        document.querySelector('.details-comment-container').style.display = 'none'; // Masquer le conteneur des détails et des commentaires
+      }
+    });
+
+    async function fetchRecords(email) {
+      let url = `https://demosales.poc.imagino.com/ucdapi/RCU/3/sCVDEMO?email=${email}`;
+
+      try {
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "X-API-KEY": "kjF_R2CRT7K7b4wLj7F1Gw=="
+          }
+        });
+        const data = await response.json();
+        if (data.data && data.data.length > 0) {
+          displaySuggestions(data.data);
+        } else {
+          clearSuggestions();
+          document.querySelector('.details-comment-container').style.display = 'none'; // Masquer le conteneur des détails et des commentaires
+        }
+      } catch (error) {
+        console.error('Error fetching records:', error);
+        clearSuggestions();
+        document.querySelector('.details-comment-container').style.display = 'none'; // Masquer le conteneur des détails et des commentaires
+      }
+    }
+
+    function displaySuggestions(records) {
+      const suggestions = document.getElementById('suggestions');
+      suggestions.innerHTML = '';
+      records.forEach(record => {
+        const div = document.createElement('div');
+        div.textContent = `${record.firstName} ${record.lastName} - ${record.email}`;
+        div.addEventListener('click', () => {
+          fetchClientDetails(record.email);
+          document.getElementById('emailInput').value = record.email;
+          clearSuggestions();
+        });
+        suggestions.appendChild(div);
+      });
+    }
+
+    async function fetchClientDetails(email) {
+      let url = `https://demosales.poc.imagino.com/ucdapi/RCU/3/sCVDEMO?exact_email=${email}`;
+
+      try {
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            "X-API-KEY": "kjF_R2CRT7K7b4wLj7F1Gw=="
+          }
+        });
+        const data = await response.json();
+        processClientDetails(data);
+      } catch (error) {
+        console.error('Error fetching client details:', error);
+        document.querySelector('.details-comment-container').style.display = 'none'; // Masquer le conteneur des détails et des commentaires
+      }
+    }
+
+    function processClientDetails(data) {
+      if (data && data.data && data.data.length > 0) {
+        const client = data.data[0];
+        document.querySelector('.details-comment-container').style.display = 'flex'; // Afficher le conteneur des détails et des commentaires
+        document.getElementById('client-firstname').value = client.firstName;
+        document.getElementById('client-lastname').value = client.lastName;
+        document.getElementById('client-email').value = client.email;
+        document.getElementById('client-optin').value = 'True'; // Remplacer par client.optInEmail si disponible
+        document.getElementById('client-status').value = 'VIP'; // Exemple de statut
+        document.getElementById('client-seller').value = 'Kiki'; // Exemple de nom du chien
+
+        // Process store transactions
+        const storeTransactions = client['5_dernieres_transactions_magasin'];
+        const storeTransactionsList = document.getElementById('store-transactions');
+        storeTransactionsList.innerHTML = '';
+        storeTransactions.forEach(transaction => {
+          const li = document.createElement('li');
+          li.textContent = `${transaction.DATE}: ${transaction.CATEGORY} - ${transaction.DESCRIPTION} (${transaction.AMOUNT} EUR ${transaction.VENDEUR})`;
+          storeTransactionsList.appendChild(li);
+
+          // Ajouter le bouton Check-in si la date de la transaction est aujourd'hui
+          if (new Date(transaction.DATE).toISOString().split('T')[0] === new Date().toISOString().split('T')[0]) {
+            const checkinButton = document.createElement('button');
+            checkinButton.className = 'checkin-button';
+            checkinButton.innerText = 'Check-in';
+            checkinButton.addEventListener('click', function() {
+              showCheckinPopin();
+            });
+            li.appendChild(checkinButton);
+          }
+        });
+
+        // Process web transactions
+        const webTransactions = client['5_dernieres_transactions_web'];
+        const webTransactionsList = document.getElementById('web-transactions');
+        webTransactionsList.innerHTML = '';
+        webTransactions.forEach(transaction => {
+          const li = document.createElement('li');
+          li.textContent = `${transaction.DATE}: ${transaction.CATEGORY} - ${transaction.DESCRIPTION} (${transaction.AMOUNT} EUR)`;
+          webTransactionsList.appendChild(li);
+        });
+
+        // Adjust the height of the transactions div based on the number of transactions
+        const transactionsDiv = document.getElementById('transactions');
+        const totalTransactions = storeTransactions.length + webTransactions.length;
+        transactionsDiv.style.height = 'auto'; // Ajustement dynamique de la hauteur
+
+        // Event listener for edit icon
+        document.getElementById('edit-icon').addEventListener('click', enableEditing);
+
+        // Show comment section
+        document.getElementById('comment-section').style.display = 'block';
+      } else {
+        document.querySelector('.details-comment-container').style.display = 'none'; // Masquer le conteneur des détails et des commentaires
+      }
+    }
+
+    function enableEditing() {
+      const firstName = document.getElementById('client-firstname');
+      const lastName = document.getElementById('client-lastname');
+      const email = document.getElementById('client-email');
+      const saveButton = document.getElementById('save-button');
+
+      if (firstName.readOnly && lastName.readOnly && email.readOnly) {
+        firstName.removeAttribute('readonly');
+        lastName.removeAttribute('readonly');
+        email.removeAttribute('readonly');
+        firstName.classList.remove('non-editable');
+        lastName.classList.remove('non-editable');
+        email.classList.remove('non-editable');
+        saveButton.style.display = 'inline-block'; // Afficher le bouton de sauvegarde
+      } else {
+        firstName.setAttribute('readonly', true);
+        lastName.setAttribute('readonly', true);
+        email.setAttribute('readonly', true);
+        firstName.classList.add('non-editable');
+        lastName.classList.add('non-editable');
+        email.classList.add('non-editable');
+        saveButton.style.display = 'none'; // Masquer le bouton de sauvegarde
+      }
+    }
+
+    document.getElementById('save-button').addEventListener('click', function() {
+      document.getElementById('confirmation-pop-in').style.display = 'block';
+      document.getElementById('overlay').style.display = 'block';
+
+      document.getElementById('confirm-button').addEventListener('click', saveClientDetails);
+      document.getElementById('cancel-button').addEventListener('click', hideConfirmationPopIn);
+    });
+
+    function hideConfirmationPopIn() {
+      document.getElementById('confirmation-pop-in').style.display = 'none';
+      document.getElementById('overlay').style.display = 'none';
+    }
+
+    async function saveClientDetails() {
+      const email = document.getElementById('client-email').value;
+      const firstName = document.getElementById('client-firstname').value;
+      const lastName = document.getElementById('client-lastname').value;
+
+      let url = `https://demosales.poc.imagino.com/ucdapi/RCU/3/sCVDEMO`;
+
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-API-KEY": "kjF_R2CRT7K7b4wLj7F1Gw=="
+          },
+          body: JSON.stringify({
+            email: email,
+            firstName: firstName,
+            lastName: lastName
+          })
+        });
+
+        if (response.ok) {
+          // alert('Client details updated successfully!');
+          document.getElementById('client-firstname').setAttribute('readonly', true);
+          document.getElementById('client-lastname').setAttribute('readonly', true);
+          document.getElementById('client-email').setAttribute('readonly', true);
+          document.getElementById('client-firstname').classList.add('non-editable');
+          document.getElementById('client-lastname').classList.add('non-editable');
+          document.getElementById('client-email').classList.add('non-editable');
+          document.getElementById('save-button').style.display = 'none'; // Masquer le bouton de sauvegarde
+
+          // Change icon back to edit after saving
+          document.getElementById('edit-icon').src = 'https://cdn-icons-png.flaticon.com/512/1250/1250615.png'; // Change to edit icon URL
+          document.getElementById('edit-icon').removeEventListener('click', saveClientDetails);
+          document.getElementById('edit-icon').addEventListener('click', enableEditing);
+
+          // Hide the confirmation pop-in
+          hideConfirmationPopIn();
+        } else {
+          alert('Failed to update client details.');
+        }
+      } catch (error) {
+        console.error('Error updating client details:', error);
+        alert('Error updating client details.');
+      }
+    }
+
+    function clearSuggestions() {
+      document.getElementById('suggestions').innerHTML = '';
+      document.querySelector('.details-comment-container').style.display = 'none'; // Masquer le conteneur des détails et des commentaires
+    }
+
+    document.getElementById('pen-icon').addEventListener('click', function() {
+      const commentTextarea = document.getElementById('comment-textarea');
+      if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
+        commentTextarea.style.display = 'block';
+      } else {
+        commentTextarea.style.display = 'none';
+      }
+    });
+
+    document.getElementById('submitCommentButton').addEventListener('click', function() {
+      document.getElementById('comment-confirmation-pop-in').style.display = 'block';
+      document.getElementById('comment-overlay').style.display = 'block';
+
+      document.getElementById('comment-confirm-button').addEventListener('click', createComment);
+      document.getElementById('comment-cancel-button').addEventListener('click', hideCommentConfirmationPopIn);
+    });
+
+    function hideCommentConfirmationPopIn() {
+      document.getElementById('comment-confirmation-pop-in').style.display = 'none';
+      document.getElementById('comment-overlay').style.display = 'none';
+    }
+
+    async function createComment(commentText) {
+      const email = document.getElementById("emailInput").value;
+      const comment = commentText || document.getElementById("comment").value;
+
+      const url = "https://demosales.poc.imagino.com/ucdapi/Commentaires/1/consentements";
+
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-API-KEY": "kjF_R2CRT7K7b4wLj7F1Gw=="
+          },
+          body: JSON.stringify({
+            "Commentaires": comment,
+            "date": new Date().toISOString(),
+            "email": email,
+            "id_personnel": "John Doe Hotel Manager",
+            "iD_Consent": new Date().toISOString(),
+            "source": "Omnichanel Communication System"
+          })
+        });
+
+        if (response.ok) {
+          //alert('Comment submitted successfully!');
+          hideCommentConfirmationPopIn();
+          document.getElementById('comment-textarea').style.display = 'none';
+        } else {
+          alert('Failed to submit comment.');
+        }
+      } catch (error) {
+        console.error('Error submitting comment:', error);
+        alert('Error submitting comment.');
+      }
+    }
+
+    async function checkin() {
+      const email = document.getElementById("emailInput").value;
+      const url = "https://demosales.poc.imagino.com/ucdapi/Commentaires/1/consentements";
+
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-API-KEY": "kjF_R2CRT7K7b4wLj7F1Gw=="
+          },
+          body: JSON.stringify({
+            "Commentaires": "Check-in confirmé",
+            "date": new Date().toISOString(),
+            "email": "quentin.ecuer@imagino.com",
+            "id_personnel": "John Doe Hotel Manager",
+            "iD_Consent": new Date().toISOString(),
+            "source": "checkin"
+          })
+        });
+
+        if (response.ok) {
+          // alert('Check-in confirmed successfully!');
+          hideCheckinPopin();
+        } else {
+          alert('Failed to confirm check-in.');
+        }
+      } catch (error) {
+        console.error('Error confirming check-in:', error);
+        alert('Error confirming check-in.');
+      }
+    }
+
+    function showCheckinPopin() {
+      document.getElementById('checkin-popin-overlay').style.display = 'block';
+      document.getElementById('checkin-popin').style.display = 'block';
+    }
+
+    function hideCheckinPopin() {
+      document.getElementById('checkin-popin-overlay').style.display = 'none';
+      document.getElementById('checkin-popin').style.display = 'none';
+    }
+
+    document.getElementById('confirm-checkin-button').addEventListener('click', function() {
+      checkin();
+    });
+
+    document.getElementById('cancel-checkin-button').addEventListener('click', function() {
+      hideCheckinPopin();
+    });
+
+    document.getElementById('add-contact-button').addEventListener('click', function() {
+      document.getElementById('contact-pop-in').style.display = 'block';
+      document.getElementById('contact-overlay').style.display = 'block';
+    });
+
+    document.getElementById('cancel-create-contact-button').addEventListener('click', function() {
+      document.getElementById('contact-pop-in').style.display = 'none';
+      document.getElementById('contact-overlay').style.display = 'none';
+    });
+
+    document.getElementById('create-contact-button').addEventListener('click', async function() {
+      const firstName = document.getElementById('new-firstname').value;
+      const lastName = document.getElementById('new-lastname').value;
+      const email = document.getElementById('new-email').value;
+
+      let url = `https://demosales.poc.imagino.com/ucdapi/RCU/3/sCVDEMO`;
+
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-API-KEY": "kjF_R2CRT7K7b4wLj7F1Gw=="
+          },
+          body: JSON.stringify({
+            email: email,
+            firstName: firstName,
+            lastName: lastName
+          })
+        });
+
+        if (response.ok) {
+          // alert('Contact created successfully!');
+          document.getElementById('contact-pop-in').style.display = 'none';
+          document.getElementById('contact-overlay').style.display = 'none';
+        } else {
+          alert('Failed to create contact.');
+        }
+      } catch (error) {
+        console.error('Error creating contact:', error);
+        alert('Error creating contact.');
+      }
+    });
+
+    // Ajout des boutons Check-in pour les transactions d'aujourd'hui
+    function addCheckinButtons() {
+      const transactions = document.querySelectorAll('#store-transactions li, #web-transactions li');
+      const today = new Date().toISOString().split('T')[0];
+      transactions.forEach(transaction => {
+        const transactionDate = transaction.textContent.split(':')[0];
+        if (transactionDate === today) {
+          const checkinButton = document.createElement('button');
+          checkinButton.className = 'checkin-button';
+          checkinButton.innerText = 'Check-in';
+          checkinButton.addEventListener('click', function() {
+            showCheckinPopin();
+          });
+          transaction.appendChild(checkinButton);
+        }
+      });
+    }
+
+    // Appeler la fonction après le chargement des transactions
+    setTimeout(addCheckinButtons, 500); // Attendre un peu que les transactions soient chargées
+
+  </script>
+</body>
+</html>
