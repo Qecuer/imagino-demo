@@ -329,6 +329,36 @@ p input[type="text"] {
   flex: 1;
   margin-left: 40px;
 }
+
+/* CSS pour styliser le bouton Check-in */
+.checkin-button {
+  background-color: #d4af37; /* Couleur de fond dorée */
+  color: #ffffff; /* Couleur du texte blanche */
+  border: none; /* Pas de bordure */
+  border-radius: 5px; /* Coins arrondis */
+  padding: 10px 20px; /* Espacement interne (haut, droite, bas, gauche) */
+  font-size: 16px; /* Taille de police */
+  font-family: 'Georgia', serif; /* Police de caractères */  cursor: pointer; /* Curseur en forme de main au survol */
+  transition: background-color 0.3s ease, color 0.3s ease; /* Transition pour les effets de survol */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Ombre pour donner un effet de relief */
+  margin-left: 20px; /* Marge gauche */
+  margin-right: 20px; /* Marge droite */
+  margin-top: 10px; /* Marge supérieure */
+}
+
+/* Effet de survol */
+.checkin-button:hover {
+  background-color: #00254d; /* Couleur de fond bleue foncée */
+  color: #d4af37; /* Couleur du texte dorée */
+}
+
+/* Effet de clic */
+.checkin-button:active {
+  background-color: #001f3b; /* Couleur de fond encore plus foncée au clic */
+  color: #f2f2f2; /* Couleur du texte plus claire au clic */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Réduire l'ombre pour un effet de clic */
+  transform: translateY(1px); /* Légère translation vers le bas pour effet de clic */
+}
   </style>
   <link rel="icon" href="https://imostripo.blob.core.windows.net/ac90110b5f984bcca8704d4591edc0df/lib/pluginId_ac90110b5f984bcca8704d4591edc0df_0cabc361-cc0b-481c-8a4f-806d3445148f/telechargement_LUH.png" type="image/gif" />
 </head>
@@ -356,17 +386,17 @@ p input[type="text"] {
             <p><strong>Last Name:</strong> <input type="text" id="client-lastname" class="editable non-editable" readonly></p>
             <p><strong>Email:</strong> <input type="text" id="client-email" class="editable non-editable" readonly></p>
             <p><strong>Opt-In Email:</strong> <input type="text" id="client-optin" class="editable non-editable" readonly></p>
-            <p><strong>Status:</strong> <input type="text" id="client-status"class="editable non-editable" readonly></p>
+            <p><strong>Status:</strong> <input type="text" id="client-status" class="editable non-editable" readonly></p>
             <p><strong>Nom du chien :</strong><input type="text" id="client-seller" class="editable non-editable" readonly></p>
             <button id="save-button">Update contact details</button>
             <div id="transactions">
               <h2>Recent Activities</h2>
               <div>
-                <h3>Rooms & Suites</h3>
+                <h3>Restaurants & Bars</h3>
                 <ul id="store-transactions" class="transaction-list"></ul>
               </div>
               <div>
-                <h3>Restaurants & Bars</h3>
+                <h3>Rooms & Suites</h3>
                 <ul id="web-transactions" class="transaction-list"></ul>
               </div>
             </div>
@@ -411,6 +441,15 @@ p input[type="text"] {
     <p>Email: <input type="text" id="new-email"></p>
     <button class="confirm" id="create-contact-button">Create</button>
     <button class="cancel" id="cancel-create-contact-button">Cancel</button>
+  </div>
+
+  <!-- Pop-in de confirmation de Check-in -->
+  <div class="overlay" id="checkin-popin-overlay"></div>
+  <div class="pop-in" id="checkin-popin">
+    <h3>Confirmer Check-in</h3>
+    <p>Êtes-vous sûr de vouloir faire le check-in ?</p>
+    <button class="confirm" id="confirm-checkin-button">Oui</button>
+    <button class="cancel" id="cancel-checkin-button">Non</button>
   </div>
 
   <script>
@@ -499,8 +538,19 @@ p input[type="text"] {
         storeTransactionsList.innerHTML = '';
         storeTransactions.forEach(transaction => {
           const li = document.createElement('li');
-          li.textContent = `${transaction.DATE}: ${transaction.CATEGORY} - ${transaction.DESCRIPTION} (${transaction.AMOUNT} EUR, ${transaction.VENDEUR})`;
+          li.textContent = `${transaction.DATE}: ${transaction.CATEGORY} - ${transaction.DESCRIPTION} (${transaction.AMOUNT} EUR ${transaction.VENDEUR})`;
           storeTransactionsList.appendChild(li);
+
+          // Ajouter le bouton Check-in si la date de la transaction est aujourd'hui
+          if (new Date(transaction.DATE).toISOString().split('T')[0] === new Date().toISOString().split('T')[0]) {
+            const checkinButton = document.createElement('button');
+            checkinButton.className = 'checkin-button';
+            checkinButton.innerText = 'Check-in';
+            checkinButton.addEventListener('click', function() {
+              showCheckinPopin();
+            });
+            li.appendChild(checkinButton);
+          }
         });
 
         // Process web transactions
@@ -516,207 +566,282 @@ p input[type="text"] {
         // Adjust the height of the transactions div based on the number of transactions
         const transactionsDiv = document.getElementById('transactions');
         const totalTransactions = storeTransactions.length + webTransactions.length;
-        transactionsDiv.style.height = 'auto'; // Ajustement dynamique de la hauteur        transactionsDiv.style.height = 'auto'; // Ajustement dynamique de la hauteur
+        transactionsDiv.style.height = 'auto'; // Ajustement dynamique de la hauteur
 
-// Event listener for edit icon
-document.getElementById('edit-icon').addEventListener('click', enableEditing);
+        // Event listener for edit icon
+        document.getElementById('edit-icon').addEventListener('click', enableEditing);
 
-// Show comment section
-document.getElementById('comment-section').style.display = 'block';
-} else {
-document.querySelector('.details-comment-container').style.display = 'none'; // Masquer le conteneur des détails et des commentaires
-}
-}
+        // Show comment section
+        document.getElementById('comment-section').style.display = 'block';
+      } else {
+        document.querySelector('.details-comment-container').style.display = 'none'; // Masquer le conteneur des détails et des commentaires
+      }
+    }
 
-function enableEditing() {
-const firstName = document.getElementById('client-firstname');
-const lastName = document.getElementById('client-lastname');
-const email = document.getElementById('client-email');
-const saveButton = document.getElementById('save-button');
+    function enableEditing() {
+      const firstName = document.getElementById('client-firstname');
+      const lastName = document.getElementById('client-lastname');
+      const email = document.getElementById('client-email');
+      const saveButton = document.getElementById('save-button');
 
-if (firstName.readOnly && lastName.readOnly) {
-firstName.removeAttribute('readonly');
-lastName.removeAttribute('readonly');
-email.removeAttribute('readonly');
-firstName.classList.remove('non-editable');
-lastName.classList.remove('non-editable');
-email.classList.remove('non-editable');
-saveButton.style.display = 'inline-block'; // Afficher le bouton de sauvegarde
-} else {
-firstName.setAttribute('readonly', true);
-lastName.setAttribute('readonly', true);
-email.setAttribute('readonly', true);
-firstName.classList.add('non-editable');
-lastName.classList.add('non-editable');
-email.classList.add('non-editable');
-saveButton.style.display = 'none'; // Masquer le bouton de sauvegarde
-}
-}
+      if (firstName.readOnly && lastName.readOnly && email.readOnly) {
+        firstName.removeAttribute('readonly');
+        lastName.removeAttribute('readonly');
+        email.removeAttribute('readonly');
+        firstName.classList.remove('non-editable');
+        lastName.classList.remove('non-editable');
+        email.classList.remove('non-editable');
+        saveButton.style.display = 'inline-block'; // Afficher le bouton de sauvegarde
+      } else {
+        firstName.setAttribute('readonly', true);
+        lastName.setAttribute('readonly', true);
+        email.setAttribute('readonly', true);
+        firstName.classList.add('non-editable');
+        lastName.classList.add('non-editable');
+        email.classList.add('non-editable');
+        saveButton.style.display = 'none'; // Masquer le bouton de sauvegarde
+      }
+    }
 
-document.getElementById('save-button').addEventListener('click', function() {
-document.getElementById('confirmation-pop-in').style.display = 'block';
-document.getElementById('overlay').style.display = 'block';
+    document.getElementById('save-button').addEventListener('click', function() {
+      document.getElementById('confirmation-pop-in').style.display = 'block';
+      document.getElementById('overlay').style.display = 'block';
 
-document.getElementById('confirm-button').addEventListener('click', saveClientDetails);
-document.getElementById('cancel-button').addEventListener('click', hideConfirmationPopIn);
-});
+      document.getElementById('confirm-button').addEventListener('click', saveClientDetails);
+      document.getElementById('cancel-button').addEventListener('click', hideConfirmationPopIn);
+    });
 
-function hideConfirmationPopIn() {
-document.getElementById('confirmation-pop-in').style.display = 'none';
-document.getElementById('overlay').style.display = 'none';
-}
+    function hideConfirmationPopIn() {
+      document.getElementById('confirmation-pop-in').style.display = 'none';
+      document.getElementById('overlay').style.display = 'none';
+    }
 
-async function saveClientDetails() {
-const email = document.getElementById('client-email').value;
-const firstName = document.getElementById('client-firstname').value;
-const lastName = document.getElementById('client-lastname').value;
+    async function saveClientDetails() {
+      const email = document.getElementById('client-email').value;
+      const firstName = document.getElementById('client-firstname').value;
+      const lastName = document.getElementById('client-lastname').value;
 
-let url = `https://demosales.poc.imagino.com/ucdapi/RCU/3/sCVDEMO`;
+      let url = `https://demosales.poc.imagino.com/ucdapi/RCU/3/sCVDEMO`;
 
-try {
-const response = await fetch(url, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    "X-API-KEY": "kjF_R2CRT7K7b4wLj7F1Gw=="
-  },
-  body: JSON.stringify({
-    email: email,
-    firstName: firstName,
-    lastName: lastName
-  })
-});
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-API-KEY": "kjF_R2CRT7K7b4wLj7F1Gw=="
+          },
+          body: JSON.stringify({
+            email: email,
+            firstName: firstName,
+            lastName: lastName
+          })
+        });
 
-if (response.ok) {
- // alert('Client details updated successfully!');
-  document.getElementById('client-firstname').setAttribute('readonly', true);
-  document.getElementById('client-lastname').setAttribute('readonly', true);
-  document.getElementById('client-firstname').classList.add('non-editable');
-  document.getElementById('client-lastname').classList.add('non-editable');
-  document.getElementById('save-button').style.display = 'none'; // Masquer le bouton de sauvegarde
+        if (response.ok) {
+          // alert('Client details updated successfully!');
+          document.getElementById('client-firstname').setAttribute('readonly', true);
+          document.getElementById('client-lastname').setAttribute('readonly', true);
+          document.getElementById('client-email').setAttribute('readonly', true);
+          document.getElementById('client-firstname').classList.add('non-editable');
+          document.getElementById('client-lastname').classList.add('non-editable');
+          document.getElementById('client-email').classList.add('non-editable');
+          document.getElementById('save-button').style.display = 'none'; // Masquer le bouton de sauvegarde
 
-  // Change icon back to edit after saving
-  document.getElementById('edit-icon').src = 'https://cdn-icons-png.flaticon.com/512/1250/1250615.png'; // Change to edit icon URL
-  document.getElementById('edit-icon').removeEventListener('click', saveClientDetails);
-  document.getElementById('edit-icon').addEventListener('click', enableEditing);
+          // Change icon back to edit after saving
+          document.getElementById('edit-icon').src = 'https://cdn-icons-png.flaticon.com/512/1250/1250615.png'; // Change to edit icon URL
+          document.getElementById('edit-icon').removeEventListener('click', saveClientDetails);
+          document.getElementById('edit-icon').addEventListener('click', enableEditing);
 
-  // Hide the confirmation pop-in
-  hideConfirmationPopIn();
-} else {
-  alert('Failed to update client details.');
-}
-} catch (error) {
-console.error('Error updating client details:', error);
-alert('Error updating client details.');
-}
-}
+          // Hide the confirmation pop-in
+          hideConfirmationPopIn();
+        } else {
+          alert('Failed to update client details.');
+        }
+      } catch (error) {
+        console.error('Error updating client details:', error);
+        alert('Error updating client details.');
+      }
+    }
 
-function clearSuggestions() {
-document.getElementById('suggestions').innerHTML = '';
-document.querySelector('.details-comment-container').style.display = 'none'; // Masquer le conteneur des détails et des commentaires
-}
+    function clearSuggestions() {
+      document.getElementById('suggestions').innerHTML = '';
+      document.querySelector('.details-comment-container').style.display = 'none'; // Masquer le conteneur des détails et des commentaires
+    }
 
-document.getElementById('pen-icon').addEventListener('click', function() {
-const commentTextarea = document.getElementById('comment-textarea');
-if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
-commentTextarea.style.display = 'block';
-} else {
-commentTextarea.style.display = 'none';
-}
-});
+    document.getElementById('pen-icon').addEventListener('click', function() {
+      const commentTextarea = document.getElementById('comment-textarea');
+      if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
+        commentTextarea.style.display = 'block';
+      } else {
+        commentTextarea.style.display = 'none';
+      }
+    });
 
-document.getElementById('submitCommentButton').addEventListener('click', function() {
-document.getElementById('comment-confirmation-pop-in').style.display = 'block';
-document.getElementById('comment-overlay').style.display = 'block';
+    document.getElementById('submitCommentButton').addEventListener('click', function() {
+      document.getElementById('comment-confirmation-pop-in').style.display = 'block';
+      document.getElementById('comment-overlay').style.display = 'block';
 
-document.getElementById('comment-confirm-button').addEventListener('click', createComment);
-document.getElementById('comment-cancel-button').addEventListener('click', hideCommentConfirmationPopIn);
-});
+      document.getElementById('comment-confirm-button').addEventListener('click', createComment);
+      document.getElementById('comment-cancel-button').addEventListener('click', hideCommentConfirmationPopIn);
+    });
 
-function hideCommentConfirmationPopIn() {
-document.getElementById('comment-confirmation-pop-in').style.display = 'none';
-document.getElementById('comment-overlay').style.display = 'none';
-}
+    function hideCommentConfirmationPopIn() {
+      document.getElementById('comment-confirmation-pop-in').style.display = 'none';
+      document.getElementById('comment-overlay').style.display = 'none';
+    }
 
-async function createComment() {
-const email = document.getElementById("emailInput").value;
-const comment = document.getElementById("comment").value;
+    async function createComment(commentText) {
+      const email = document.getElementById("emailInput").value;
+      const comment = commentText || document.getElementById("comment").value;
 
-const url = "https://demosales.poc.imagino.com/ucdapi/Commentaires/1/consentements";
+      const url = "https://demosales.poc.imagino.com/ucdapi/Commentaires/1/consentements";
 
-try {
-const response = await fetch(url, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    "X-API-KEY": "kjF_R2CRT7K7b4wLj7F1Gw=="
-  },
-  body: JSON.stringify({
-    "Commentaires": comment,
-    "date": new Date().toISOString(),
-    "email": email,
-    "id_personnel": "John Doe Hotel Manager",
-    "iD_Consent": new Date().toISOString(),
-    "source": "Omnichanel Communication System"
-  })
-});
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-API-KEY": "kjF_R2CRT7K7b4wLj7F1Gw=="
+          },
+          body: JSON.stringify({
+            "Commentaires": comment,
+            "date": new Date().toISOString(),
+            "email": email,
+            "id_personnel": "John Doe Hotel Manager",
+            "iD_Consent": new Date().toISOString(),
+            "source": "Omnichanel Communication System"
+          })
+        });
 
-if (response.ok) {
-  //alert('Comment submitted successfully!');
-  hideCommentConfirmationPopIn();
-  document.getElementById('comment-textarea').style.display = 'none';
-} else {
-  alert('Failed to submit comment.');
-}
-} catch (error) {
-console.error('Error submitting comment:', error);
-alert('Error submitting comment.');
-}
-}
+        if (response.ok) {
+          //alert('Comment submitted successfully!');
+          hideCommentConfirmationPopIn();
+          document.getElementById('comment-textarea').style.display = 'none';
+        } else {
+          alert('Failed to submit comment.');
+        }
+      } catch (error) {
+        console.error('Error submitting comment:', error);
+        alert('Error submitting comment.');
+      }
+    }
 
-document.getElementById('add-contact-button').addEventListener('click', function() {
-document.getElementById('contact-pop-in').style.display = 'block';
-document.getElementById('contact-overlay').style.display = 'block';
-});
+    async function checkin() {
+      const email = document.getElementById("emailInput").value;
+      const url = "https://demosales.poc.imagino.com/ucdapi/Commentaires/1/consentements";
 
-document.getElementById('cancel-create-contact-button').addEventListener('click', function() {
-document.getElementById('contact-pop-in').style.display = 'none';
-document.getElementById('contact-overlay').style.display = 'none';
-});
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-API-KEY": "kjF_R2CRT7K7b4wLj7F1Gw=="
+          },
+          body: JSON.stringify({
+            "Commentaires": "Check-in confirmé",
+            "date": new Date().toISOString(),
+            "email": "quentin.ecuer@imagino.com",
+            "id_personnel": "John Doe Hotel Manager",
+            "iD_Consent": new Date().toISOString(),
+            "source": "checkin"
+          })
+        });
 
-document.getElementById('create-contact-button').addEventListener('click', async function() {
-const firstName = document.getElementById('new-firstname').value;
-const lastName = document.getElementById('new-lastname').value;
-const email = document.getElementById('new-email').value;
+        if (response.ok) {
+          // alert('Check-in confirmed successfully!');
+          hideCheckinPopin();
+        } else {
+          alert('Failed to confirm check-in.');
+        }
+      } catch (error) {
+        console.error('Error confirming check-in:', error);
+        alert('Error confirming check-in.');
+      }
+    }
 
-let url = `https://demosales.poc.imagino.com/ucdapi/RCU/3/sCVDEMO`;
+    function showCheckinPopin() {
+      document.getElementById('checkin-popin-overlay').style.display = 'block';
+      document.getElementById('checkin-popin').style.display = 'block';
+    }
 
-try {
-const response = await fetch(url, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    "X-API-KEY": "kjF_R2CRT7K7b4wLj7F1Gw=="
-  },
-  body: JSON.stringify({
-    email: email,
-    firstName: firstName,
-    lastName: lastName
-  })
-});
+    function hideCheckinPopin() {
+      document.getElementById('checkin-popin-overlay').style.display = 'none';
+      document.getElementById('checkin-popin').style.display = 'none';
+    }
 
-if (response.ok) {
- // alert('Contact created successfully!');
-  document.getElementById('contact-pop-in').style.display = 'none';
-  document.getElementById('contact-overlay').style.display = 'none';
-} else {
-  alert('Failed to create contact.');
-}
-} catch (error) {
-console.error('Error creating contact:', error);
-alert('Error creating contact.');
-}
-});
-</script>
+    document.getElementById('confirm-checkin-button').addEventListener('click', function() {
+      checkin();
+    });
+
+    document.getElementById('cancel-checkin-button').addEventListener('click', function() {
+      hideCheckinPopin();
+    });
+
+    document.getElementById('add-contact-button').addEventListener('click', function() {
+      document.getElementById('contact-pop-in').style.display = 'block';
+      document.getElementById('contact-overlay').style.display = 'block';
+    });
+
+    document.getElementById('cancel-create-contact-button').addEventListener('click', function() {
+      document.getElementById('contact-pop-in').style.display = 'none';
+      document.getElementById('contact-overlay').style.display = 'none';
+    });
+
+    document.getElementById('create-contact-button').addEventListener('click', async function() {
+      const firstName = document.getElementById('new-firstname').value;
+      const lastName = document.getElementById('new-lastname').value;
+      const email = document.getElementById('new-email').value;
+
+      let url = `https://demosales.poc.imagino.com/ucdapi/RCU/3/sCVDEMO`;
+
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-API-KEY": "kjF_R2CRT7K7b4wLj7F1Gw=="
+          },
+          body: JSON.stringify({
+            email: email,
+            firstName: firstName,
+            lastName: lastName
+          })
+        });
+
+        if (response.ok) {
+          // alert('Contact created successfully!');
+          document.getElementById('contact-pop-in').style.display = 'none';
+          document.getElementById('contact-overlay').style.display = 'none';
+        } else {
+          alert('Failed to create contact.');
+        }
+      } catch (error) {
+        console.error('Error creating contact:', error);
+        alert('Error creating contact.');
+      }
+    });
+
+    // Ajout des boutons Check-in pour les transactions d'aujourd'hui
+    function addCheckinButtons() {
+      const transactions = document.querySelectorAll('#store-transactions li, #web-transactions li');
+      const today = new Date().toISOString().split('T')[0];
+      transactions.forEach(transaction => {
+        const transactionDate = transaction.textContent.split(':')[0];
+        if (transactionDate === today) {
+          const checkinButton = document.createElement('button');
+          checkinButton.className = 'checkin-button';
+          checkinButton.innerText = 'Check-in';
+          checkinButton.addEventListener('click', function() {
+            showCheckinPopin();
+          });
+          transaction.appendChild(checkinButton);
+        }
+      });
+    }
+
+    // Appeler la fonction après le chargement des transactions
+    setTimeout(addCheckinButtons, 500); // Attendre un peu que les transactions soient chargées
+
+  </script>
 </body>
 </html>
