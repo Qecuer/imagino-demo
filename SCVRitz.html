@@ -392,11 +392,11 @@ p input[type="text"] {
             <div id="transactions">
               <h2>Recent Activities</h2>
               <div>
-                <h3>Restaurants & Bars</h3>
+                <h3>Rooms & Suites</h3>
                 <ul id="store-transactions" class="transaction-list"></ul>
               </div>
               <div>
-                <h3>Rooms & Suites</h3>
+                <h3>Restaurants & Bars</h3>
                 <ul id="web-transactions" class="transaction-list"></ul>
               </div>
             </div>
@@ -538,7 +538,7 @@ p input[type="text"] {
         storeTransactionsList.innerHTML = '';
         storeTransactions.forEach(transaction => {
           const li = document.createElement('li');
-          li.textContent = `${transaction.DATE}: ${transaction.CATEGORY} - ${transaction.DESCRIPTION} (${transaction.AMOUNT} EUR ${transaction.VENDEUR})`;
+          li.textContent = `${transaction.DATE}: ${transaction.DESCRIPTION} (${transaction.AMOUNT} EUR)`;
           storeTransactionsList.appendChild(li);
 
           // Ajouter le bouton Check-in si la date de la transaction est aujourd'hui
@@ -559,7 +559,7 @@ p input[type="text"] {
         webTransactionsList.innerHTML = '';
         webTransactions.forEach(transaction => {
           const li = document.createElement('li');
-          li.textContent = `${transaction.DATE}: ${transaction.CATEGORY} - ${transaction.DESCRIPTION} (${transaction.AMOUNT} EUR)`;
+          li.textContent = `${transaction.DATE}: ${transaction.DESCRIPTION} (${transaction.AMOUNT} EUR)`;
           webTransactionsList.appendChild(li);
         });
 
