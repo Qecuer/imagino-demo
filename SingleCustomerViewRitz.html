@@ -588,7 +588,7 @@ const response = await fetch(url, {
 });
 
 if (response.ok) {
-  alert('Client details updated successfully!');
+ // alert('Client details updated successfully!');
   document.getElementById('client-firstname').setAttribute('readonly', true);
   document.getElementById('client-lastname').setAttribute('readonly', true);
   document.getElementById('client-firstname').classList.add('non-editable');
@@ -655,13 +655,14 @@ const response = await fetch(url, {
     "Commentaires": comment,
     "date": new Date().toISOString(),
     "email": email,
+    "id_personnel": "John Doe Hotel Manager",
     "iD_Consent": new Date().toISOString(),
-    "source": "Personnel de chambre"
+    "source": "Omnichanel Communication System"
   })
 });
 
 if (response.ok) {
-  alert('Comment submitted successfully!');
+  //alert('Comment submitted successfully!');
   hideCommentConfirmationPopIn();
   document.getElementById('comment-textarea').style.display = 'none';
 } else {
@@ -705,7 +706,7 @@ const response = await fetch(url, {
 });
 
 if (response.ok) {
-  alert('Contact created successfully!');
+ // alert('Contact created successfully!');
   document.getElementById('contact-pop-in').style.display = 'none';
   document.getElementById('contact-overlay').style.display = 'none';
 } else {
