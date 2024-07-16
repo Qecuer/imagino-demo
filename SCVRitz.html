@@ -692,7 +692,7 @@ p input[type="text"] {
 
     async function createComment(commentText) {
       const email = document.getElementById("emailInput").value;
-      const comment = commentText || document.getElementById("comment").value;
+      const comment = document.getElementById("comment").value;
 
       const url = "https://demosales.poc.imagino.com/ucdapi/Commentaires/1/consentements";
 
