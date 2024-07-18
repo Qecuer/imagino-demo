@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>360° Guest</title>
+  <title>360° Client</title>
   <style>
     body {
       font-family: 'Georgia', serif;
@@ -360,17 +360,17 @@ p input[type="text"] {
   transform: translateY(1px); /* Légère translation vers le bas pour effet de clic */
 }
   </style>
-  <link rel="icon" href="https://imostripo.blob.core.windows.net/ac90110b5f984bcca8704d4591edc0df/lib/pluginId_ac90110b5f984bcca8704d4591edc0df_0cabc361-cc0b-481c-8a4f-806d3445148f/telechargement_LUH.png" type="image/gif" />
+  <link rel="icon" href="https://pbs.twimg.com/profile_images/1457761715043639296/65RdTgOI_400x400.jpg" type="image/gif" />
 </head>
 <body>
   <div class="ipad-frame">
     <div class="content">
       <div class="user-info">
         <p style="margin-right: 10px; font-weight: bold;">Logged in as</p>
-        <p style="margin-right: 10px;">John Doe</p>
-        <p style="margin-right: 10px;">Hotel Manager</p>
+        <p style="margin-right: 10px;">Mathilde PITIOT</p>
+        <p style="margin-right: 10px;">Bureau Vallée - Marseille</p>
       </div>
-      <img src="https://cdn.cookielaw.org/logos/4d745b05-b159-43c9-90ec-35a20d43e079/8c716c50-ea83-4568-9e46-b7cf524efb92/0256bc6e-62d6-4df0-b222-7152be8be3dc/MicrosoftTeams-image.png" alt="Ritz Paris Logo" class="logo">
+      <img src="https://dxbyzx5id4chj.cloudfront.net/pub/media/wysiwyg/logos/logo-bureau-vallee-291.png" alt="Ritz Paris Logo" class="logo">
       <div style="display: flex; align-items: center;">
         <input type="text" id="emailInput" placeholder="Enter email">
         <button class="add-contact" id="add-contact-button">+</button>
@@ -386,17 +386,17 @@ p input[type="text"] {
             <p><strong>Last Name:</strong> <input type="text" id="client-lastname" class="editable non-editable" readonly></p>
             <p><strong>Email:</strong> <input type="text" id="client-email" class="editable non-editable" readonly></p>
             <p><strong>Opt-In Email:</strong> <input type="text" id="client-optin" class="editable non-editable" readonly></p>
-            <p><strong>Status:</strong> <input type="text" id="client-status" class="editable non-editable" readonly></p>
-            <p><strong>Nom du chien :</strong><input type="text" id="client-seller" class="editable non-editable" readonly></p>
+            <p><strong>Status fidélité:</strong> <input type="text" id="client-status" class="editable non-editable" readonly></p>
+            <p><strong>Nombre de points :</strong><input type="text" id="client-seller" class="editable non-editable" readonly></p>
             <button id="save-button">Update contact details</button>
             <div id="transactions">
-              <h2>Recent Activities</h2>
+              <h2>Historique d'achat</h2>
               <div>
-                <h3>Restaurants & Bars</h3>
+                <h3>Transactions magasin</h3>
                 <ul id="store-transactions" class="transaction-list"></ul>
               </div>
               <div>
-                <h3>Rooms & Suites</h3>
+                <h3>Transaction web</h3>
                 <ul id="web-transactions" class="transaction-list"></ul>
               </div>
             </div>
@@ -464,14 +464,15 @@ p input[type="text"] {
     });
 
     async function fetchRecords(email) {
-      let url = `https://demosales.poc.imagino.com/ucdapi/RCU/3/sCVDEMO?email=${email}`;
+      let url = `https://bureauvallee.poc.imagino.com/ucdapi/API_BCU_Bureau_Vallee/V2/BCU_Bureau_Vallee?email=${email}`;
+  
 
       try {
         const response = await fetch(url, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            "X-API-KEY": "kjF_R2CRT7K7b4wLj7F1Gw=="
+            "X-API-KEY": "0YC0B1jISgSfS-gkqErj0Q=="
           }
         });
         const data = await response.json();
@@ -504,13 +505,13 @@ p input[type="text"] {
     }
 
     async function fetchClientDetails(email) {
-      let url = `https://demosales.poc.imagino.com/ucdapi/RCU/3/sCVDEMO?exact_email=${email}`;
+      let url = `https://bureauvallee.poc.imagino.com/ucdapi/API_BCU_Bureau_Vallee/V2/BCU_Bureau_Vallee?exact_email=${email}`;
 
       try {
         const response = await fetch(url, {
           method: "GET",
           headers: {
-            "X-API-KEY": "kjF_R2CRT7K7b4wLj7F1Gw=="
+            "X-API-KEY": "0YC0B1jISgSfS-gkqErj0Q=="
           }
         });
         const data = await response.json();
@@ -529,16 +530,16 @@ p input[type="text"] {
         document.getElementById('client-lastname').value = client.lastName;
         document.getElementById('client-email').value = client.email;
         document.getElementById('client-optin').value = 'True'; // Remplacer par client.optInEmail si disponible
-        document.getElementById('client-status').value = 'VIP'; // Exemple de statut
-        document.getElementById('client-seller').value = 'Kiki'; // Exemple de nom du chien
+        document.getElementById('client-status').value = 'Gold'; // Exemple de statut
+        document.getElementById('client-seller').value = '250 points'; // Exemple de nom du chien
 
-        // Process store transactions
+       /* // Process store transactions
         const storeTransactions = client['5_dernieres_transactions_magasin'];
         const storeTransactionsList = document.getElementById('store-transactions');
         storeTransactionsList.innerHTML = '';
         storeTransactions.forEach(transaction => {
           const li = document.createElement('li');
-          li.textContent = `${transaction.DATE}: ${transaction.CATEGORY} - ${transaction.DESCRIPTION} (${transaction.AMOUNT} EUR ${transaction.VENDEUR})`;
+          li.textContent = `${transaction.DATE}: ${transaction.DESCRIPTION} (${transaction.AMOUNT} EUR)`;
           storeTransactionsList.appendChild(li);
 
           // Ajouter le bouton Check-in si la date de la transaction est aujourd'hui
@@ -559,7 +560,7 @@ p input[type="text"] {
         webTransactionsList.innerHTML = '';
         webTransactions.forEach(transaction => {
           const li = document.createElement('li');
-          li.textContent = `${transaction.DATE}: ${transaction.CATEGORY} - ${transaction.DESCRIPTION} (${transaction.AMOUNT} EUR)`;
+          li.textContent = `${transaction.DATE}: ${transaction.DESCRIPTION} (${transaction.AMOUNT} EUR)`;
           webTransactionsList.appendChild(li);
         });
 
@@ -567,7 +568,7 @@ p input[type="text"] {
         const transactionsDiv = document.getElementById('transactions');
         const totalTransactions = storeTransactions.length + webTransactions.length;
         transactionsDiv.style.height = 'auto'; // Ajustement dynamique de la hauteur
-
+*/
         // Event listener for edit icon
         document.getElementById('edit-icon').addEventListener('click', enableEditing);
 
@@ -621,14 +622,14 @@ p input[type="text"] {
       const firstName = document.getElementById('client-firstname').value;
       const lastName = document.getElementById('client-lastname').value;
 
-      let url = `https://demosales.poc.imagino.com/ucdapi/RCU/3/sCVDEMO`;
+      let url = `https://bureauvallee.poc.imagino.com/ucdapi/API_BCU_Bureau_Vallee/V2/BCU_Bureau_Vallee`;
 
       try {
         const response = await fetch(url, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-API-KEY": "kjF_R2CRT7K7b4wLj7F1Gw=="
+            "X-API-KEY": "0YC0B1jISgSfS-gkqErj0Q=="
           },
           body: JSON.stringify({
             email: email,
@@ -692,7 +693,7 @@ p input[type="text"] {
 
     async function createComment(commentText) {
       const email = document.getElementById("emailInput").value;
-      const comment = commentText || document.getElementById("comment").value;
+      const comment = document.getElementById("comment").value;
 
       const url = "https://demosales.poc.imagino.com/ucdapi/Commentaires/1/consentements";
 
@@ -701,7 +702,7 @@ p input[type="text"] {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-API-KEY": "kjF_R2CRT7K7b4wLj7F1Gw=="
+            "X-API-KEY": "0YC0B1jISgSfS-gkqErj0Q=="
           },
           body: JSON.stringify({
             "Commentaires": comment,
@@ -735,7 +736,7 @@ p input[type="text"] {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-API-KEY": "kjF_R2CRT7K7b4wLj7F1Gw=="
+            "X-API-KEY": "0YC0B1jISgSfS-gkqErj0Q=="
           },
           body: JSON.stringify({
             "Commentaires": "Check-in confirmé",
@@ -792,14 +793,15 @@ p input[type="text"] {
       const lastName = document.getElementById('new-lastname').value;
       const email = document.getElementById('new-email').value;
 
-      let url = `https://demosales.poc.imagino.com/ucdapi/RCU/3/sCVDEMO`;
+     
+      let url = `https://bureauvallee.poc.imagino.com/ucdapi/API_BCU_Bureau_Vallee/V2/BCU_Bureau_Vallee`;
 
       try {
         const response = await fetch(url, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-API-KEY": "kjF_R2CRT7K7b4wLj7F1Gw=="
+            "X-API-KEY": "0YC0B1jISgSfS-gkqErj0Q=="
           },
           body: JSON.stringify({
             email: email,
