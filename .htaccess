@@ -1,0 +1,25 @@
+# .htaccess example
+
+# Redirect to HTTPS
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Custom 404 error page
+ErrorDocument 404 /404.html
+
+# Restrict access to a directory
+<Directory "/path/to/directory">
+    Options -Indexes
+    Order allow,deny
+    Allow from all
+    Deny from 192.168.1.1
+</Directory>
+
+# CORS configuration (for specific domain)
+<IfModule mod_headers.c>
+    Header Set Access-Control-Allow-Origin "https://demosales.poc.imagino.com"
+    Header Set Access-Control-Allow-Methods "GET, POST, OPTIONS"
+    Header Set Access-Control-Allow-Headers "Content-Type, Authorization"
+    Header Set Access-Control-Allow-Credentials "true"
+</IfModule>
