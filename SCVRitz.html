@@ -469,10 +469,10 @@ p input[type="text"] {
       try {
         const response = await fetch(url, {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "X-API-KEY": "kjF_R2CRT7K7b4wLj7F1Gw=="
-          }
+         headers: {
+        'Origin': 'https://demosales.poc.imagino.com/',
+        "X-API-KEY": "kjF_R2CRT7K7b4wLj7F1Gw=="
+    }
         });
         const data = await response.json();
         if (data.data && data.data.length > 0) {
@@ -509,9 +509,10 @@ p input[type="text"] {
       try {
         const response = await fetch(url, {
           method: "GET",
-          headers: {
-            "X-API-KEY": "kjF_R2CRT7K7b4wLj7F1Gw=="
-          }
+         headers: {
+        'Origin': 'https://demosales.poc.imagino.com/',
+        "X-API-KEY": "kjF_R2CRT7K7b4wLj7F1Gw=="
+    }
         });
         const data = await response.json();
         processClientDetails(data);
